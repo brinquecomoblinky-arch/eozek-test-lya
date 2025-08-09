@@ -16,7 +16,7 @@ Deno.serve(async (req: Request) => {
 
   try {
     const { email }: RequestPayload = await req.json()
-    
+
     if (!email) {
       return new Response(
         JSON.stringify({ error: 'Email is required' }),
@@ -26,6 +26,9 @@ Deno.serve(async (req: Request) => {
         }
       )
     }
+
+    // Normaliza o email para evitar problemas de case
+    const normalizedEmail = email.trim().toLowerCase()
 
     // Get Stripe secret key from environment
     const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY')
@@ -42,7 +45,7 @@ Deno.serve(async (req: Request) => {
 
     // Search for customer by email
     const customersResponse = await fetch(
-      `https://api.stripe.com/v1/customers?email=${encodeURIComponent(email)}`,
+      `https://api.stripe.com/v1/customers?email=${encodeURIComponent(normalizedEmail)}`,
       {
         headers: {
           'Authorization': `Bearer ${stripeSecretKey}`,
@@ -64,7 +67,6 @@ Deno.serve(async (req: Request) => {
     const customersData = await customersResponse.json()
     
     if (customersData.data.length === 0) {
-      // No customer found with this email
       return new Response(
         JSON.stringify({ hasActiveSubscription: false }),
         {
@@ -73,7 +75,7 @@ Deno.serve(async (req: Request) => {
       )
     }
 
-    // Check for active subscriptions for each customer (in case of multiple customers with same email)
+    // Check for active subscriptions
     let hasActiveSubscription = false
 
     for (const customer of customersData.data) {

@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { CheckCircle, ArrowRight, Loader2 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 
-interface SuccessPageProps {
-  onContinue: () => void
-}
-
-export function SuccessPage({ onContinue }: SuccessPageProps) {
+export function SuccessPage() {
+  const navigate = useNavigate()
   const { checkSubscription } = useAuth()
   const [verifying, setVerifying] = useState(true)
 
@@ -56,7 +54,7 @@ export function SuccessPage({ onContinue }: SuccessPageProps) {
         </p>
 
         <button
-          onClick={onContinue}
+          onClick={() => navigate('/dashboard')}
           className="bg-pink-600 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:bg-pink-700 transition-colors flex items-center justify-center space-x-2 w-full"
         >
           <span>Acessar Dashboard</span>

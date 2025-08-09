@@ -1,25 +1,14 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect } from 'react'
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { LandingPage } from './components/LandingPage'
 import { LoginPage } from './components/LoginPage'
 import { Dashboard } from './components/Dashboard'
 import { SuccessPage } from './components/SuccessPage'
 
-function AppContent() {
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
-  const [showLogin, setShowLogin] = useState(false)
-  const [showSuccess, setShowSuccess] = useState(false)
-
-  // Check for success parameter from Stripe
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search)
-    if (urlParams.get('session_id') && user) {
-      setShowSuccess(true)
-      // Clean up URL
-      window.history.replaceState({}, document.title, window.location.pathname)
-    }
-  }, [user])
-
+  
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -27,26 +16,52 @@ function AppContent() {
       </div>
     )
   }
-
-  if (showSuccess) {
-    return <SuccessPage onContinue={() => setShowSuccess(false)} />
+  
+  if (!user) {
+    return <Navigate to="/login" replace />
   }
+  
+  return <>{children}</>
+}
 
-  if (user) {
-    return <Dashboard />
-  }
+function AppContent() {
+  const { user } = useAuth()
+  const navigate = useNavigate()
+  const location = useLocation()
 
-  if (showLogin) {
-    return <LoginPage onBack={() => setShowLogin(false)} />
-  }
+  // Check for success parameter from Stripe
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search)
+    if (urlParams.get('session_id') && user) {
+      navigate('/success', { replace: true })
+    }
+  }, [user, location.search, navigate])
 
-  return <LandingPage onGetStarted={() => setShowLogin(true)} />
+  return (
+    <Routes>
+      <Route path="/landing" element={<LandingPage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/success" element={
+        <ProtectedRoute>
+          <SuccessPage />
+        </ProtectedRoute>
+      } />
+      <Route path="/dashboard" element={
+        <ProtectedRoute>
+          <Dashboard />
+        </ProtectedRoute>
+      } />
+      <Route path="/" element={<Navigate to="/landing" replace />} />
+    </Routes>
+  )
 }
 
 function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <BrowserRouter>
+        <AppContent />
+      </BrowserRouter>
     </AuthProvider>
   )
 }

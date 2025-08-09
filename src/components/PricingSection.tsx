@@ -1,19 +1,17 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Check, Loader2, CreditCard } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { stripe, MONTHLY_PRICE } from '../lib/stripe'
 
-interface PricingSectionProps {
-  onLoginRequired: () => void
-}
-
-export function PricingSection({ onLoginRequired }: PricingSectionProps) {
+export function PricingSection() {
+  const navigate = useNavigate()
   const { user } = useAuth()
   const [loading, setLoading] = useState(false)
 
   const handleSubscribe = async () => {
     if (!user) {
-      onLoginRequired()
+      navigate('/login')
       return
     }
 

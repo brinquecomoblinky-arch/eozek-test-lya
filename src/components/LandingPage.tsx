@@ -1,12 +1,11 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 import { ChefHat, CheckCircle, Star, ArrowRight } from 'lucide-react'
 import { PricingSection } from './PricingSection'
 
-interface LandingPageProps {
-  onGetStarted: () => void
-}
+export function LandingPage() {
+  const navigate = useNavigate()
 
-export function LandingPage({ onGetStarted }: LandingPageProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 to-rose-100">
       {/* Header */}
@@ -18,7 +17,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
               <h1 className="text-2xl font-bold text-gray-900">Gestão Confeitaria</h1>
             </div>
             <button
-              onClick={onGetStarted}
+              onClick={() => navigate('/login')}
               className="bg-pink-600 text-white px-4 py-2 rounded-lg hover:bg-pink-700 transition-colors"
             >
               Entrar
@@ -43,7 +42,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
               <button
-                onClick={onGetStarted}
+                onClick={() => navigate('/login')}
                 className="bg-pink-600 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:bg-pink-700 transform hover:scale-105 transition-all duration-200 flex items-center space-x-2"
               >
                 <span>Começar Agora</span>
@@ -69,7 +68,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
         </div>
 
         {/* Pricing Section */}
-        <PricingSection onLoginRequired={onGetStarted} />
+        <PricingSection />
 
         {/* Features */}
         <div className="py-16">

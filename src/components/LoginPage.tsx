@@ -1,12 +1,10 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { ChefHat, Mail, Lock, Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 
-interface LoginPageProps {
-  onBack: () => void
-}
-
-export function LoginPage({ onBack }: LoginPageProps) {
+export function LoginPage() {
+  const navigate = useNavigate()
   const [isLogin, setIsLogin] = useState(true)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -30,6 +28,9 @@ export function LoginPage({ onBack }: LoginPageProps) {
         setMessage(error.message)
       } else if (!isLogin) {
         setMessage('Conta criada! Verifique seu email para ativar.')
+      } else {
+        // Login successful, redirect to dashboard
+        navigate('/dashboard')
       }
     } catch (error) {
       setMessage('Erro inesperado. Tente novamente.')
@@ -45,7 +46,7 @@ export function LoginPage({ onBack }: LoginPageProps) {
           {/* Header */}
           <div className="text-center mb-8">
             <button
-              onClick={onBack}
+              onClick={() => navigate('/landing')}
               className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 mb-4"
             >
               <ChefHat className="h-6 w-6 text-pink-600" />

@@ -22,23 +22,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
       setUser(session?.user ?? null)
       if (session?.user) {
-        checkSubscription()
+        checkSubscription(session.user.email)
       } else {
         setLoading(false)
       }
     })
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session)
       setUser(session?.user ?? null)
       if (session?.user) {
-        checkSubscription()
+        checkSubscription(session.user.email)
       } else {
         setHasActiveSubscription(false)
         setLoading(false)
@@ -63,21 +61,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await supabase.auth.signOut()
   }
 
-  const checkSubscription = async () => {
-    if (!user?.email) {
+  const checkSubscription = async (emailParam?: string) => {
+    const emailToCheck = emailParam || user?.email
+    if (!emailToCheck) {
       setLoading(false)
       return
     }
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_FUNCTIONS_URL}/check-subscription`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
-        },
-        body: JSON.stringify({ email: user.email })
-      })
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_FUNCTIONS_URL}/check-subscription`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+          },
+          body: JSON.stringify({ email: emailToCheck })
+        }
+      )
 
       if (response.ok) {
         const data = await response.json()
